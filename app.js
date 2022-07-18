@@ -10,15 +10,32 @@ const prisma = new PrismaClient();
 
 //GET
 app.get("/locations", (req, res) => {
-  prisma.location.findMany({}).then((locations) => {
-    res.json(locations);
-  });
+  prisma.location
+    .findMany({
+      include: {
+        category: {
+          select: {
+            name: true,
+          }
+        },
+      },
+    })
+    .then((locations) => {
+      res.json(locations);
+    });
 });
 app.get("/locations/:id", (req, res) => {
   prisma.location
     .findUnique({
       where: {
         id: Number(req.params.id),
+      },
+      include: {
+        category: {
+          select: {
+            name: true,
+          },
+        },
       },
     })
     .then((location) => {
