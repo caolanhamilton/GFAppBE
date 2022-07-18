@@ -43,15 +43,24 @@ app.get("/locations/:id", (req, res) => {
     });
 });
 app.get("/categories/", (req, res) => {
-  prisma.category.findMany({}).then((categories) => {
-    res.json(categories);
-  });
+  prisma.category
+    .findMany({
+      include: {
+        locations: true,
+      },
+    })
+    .then((categories) => {
+      res.json(categories);
+    });
 });
 app.get("/categories/:id", (req, res) => {
   prisma.category
     .findUnique({
       where: {
         id: Number(req.params.id),
+      },
+      include: {
+        locations: true,
       },
     })
     .then((categories) => {
