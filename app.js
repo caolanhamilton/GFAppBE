@@ -26,10 +26,20 @@ app.get("/locations/:id", (req, res) => {
     });
 });
 app.get("/categories/", (req, res) => {
-  res.send("All categories!");
+  prisma.category.findMany({}).then((categories) => {
+    res.json(categories);
+  });
 });
 app.get("/categories/:id", (req, res) => {
-  res.send(`Category with id ${req.params.id}!`);
+  prisma.category
+    .findUnique({
+      where: {
+        id: Number(req.params.id),
+      },
+    })
+    .then((categories) => {
+      res.json(categories);
+    });
 });
 
 //POST
