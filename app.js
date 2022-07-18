@@ -84,6 +84,14 @@ app.post("/locations", (req, res) => {
     res.json(location);
   });
 });
-app.post("/categories", (req, res) => {});
+app.post("/categories", (req, res) => {
+  prisma.category.create({
+    data: {
+      name: req.body.name,
+    }
+  }).then((category) => {
+    res.json(category);
+  });
+});
 
 module.exports = app;
