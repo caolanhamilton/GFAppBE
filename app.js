@@ -10,9 +10,12 @@ const prisma = new PrismaClient();
 
 //GET
 app.get("/locations", (req, res) => {
+  prisma.location.findMany({}).then((locations) => {
+    res.json(locations);
+  });
 });
 app.get("/locations/:id", (req, res) => {
-  res.send(`Location with id ${req.params.id}!`);
+ 
 });
 app.get("/categories/", (req, res) => {
   res.send("All categories!");
