@@ -15,7 +15,15 @@ app.get("/locations", (req, res) => {
   });
 });
 app.get("/locations/:id", (req, res) => {
- 
+  prisma.location
+    .findUnique({
+      where: {
+        id: Number(req.params.id),
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
 });
 app.get("/categories/", (req, res) => {
   res.send("All categories!");
