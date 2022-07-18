@@ -43,7 +43,21 @@ app.get("/categories/:id", (req, res) => {
 });
 
 //POST
-app.post("/locations", (req, res) => {});
+app.post("/locations", (req, res) => {
+  prisma.location.create({
+    data: {
+      title: req.body.title,
+      description: req.body.description,
+      lat: req.body.lat,
+      lng: req.body.lng,
+      address: req.body.address,
+      image: req.body.image,
+      categoryId: req.body.categoryId,
+    }
+  }).then((location) => {
+    res.json(location);
+  });
+});
 app.post("/categories", (req, res) => {});
 
 module.exports = app;
