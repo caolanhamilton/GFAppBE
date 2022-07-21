@@ -13,18 +13,30 @@ datasource db {
 model Location {
   id        Int      @id @default(autoincrement())
   createdAt DateTime @default(now())
-  title     String   @db.VarChar(255)
+  name     String   @db.VarChar(255)
   description   String
   lat     Float    @db.DoublePrecision
   lng    Float    @db.DoublePrecision
   address String   @db.VarChar(255)
-  image   String   @db.VarChar(255)
+  image   String?   @db.VarChar(255)
+  phone  String?   @db.VarChar(255)
+  dedicatedGlutenFree Boolean
   category Category @relation(fields: [categoryId], references: [id])
-  categoryId Int     
+  categoryId Int  
+  reviews Review[]
 } 
 
 model Category {
   id        Int      @id @default(autoincrement())
   name     String   @db.VarChar(255)
   locations Location[]
+}
+
+model Review {
+  id        Int      @id @default(autoincrement())
+  location Location @relation(fields: [locationId], references: [id])
+  locationId Int
+  reviewText String   @db.VarChar(255)    
+  overallRating Float  @db.DoublePrecision
+  safetyRating Float  @db.DoublePrecision
 }
