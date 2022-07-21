@@ -70,19 +70,24 @@ app.get("/categories/:id", (req, res) => {
 
 //POST
 app.post("/locations", (req, res) => {
-  prisma.location.create({
-    data: {
-      title: req.body.title,
-      description: req.body.description,
-      lat: req.body.lat,
-      lng: req.body.lng,
-      address: req.body.address,
-      image: req.body.image,
-      categoryId: req.body.categoryId,
-    }
-  }).then((location) => {
-    res.json(location);
-  });
+  console.log(req.body.categoryId);
+  prisma.location
+    .create({
+      data: {
+        name: req.body.name,
+        description: req.body.description,
+        lat: req.body.lat,
+        lng: req.body.lng,
+        address: req.body.address,
+        image: req.body.image,
+        phone: req.body.phone,
+        dedicatedGlutenFree: req.body.dedicatedGlutenFree,
+        categoryId: req.body.categoryId,
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
 });
 app.post("/categories", (req, res) => {
   prisma.category.create({
