@@ -114,10 +114,11 @@ app.post("/categories", (req, res) => {
 app.post("/reviews", (req, res) => {
   prisma.review.create({
     data: {
+      locationId: req.body.locationId,
       reviewText: req.body.reviewText,
       overallRating: req.body.overallRating,
       safetyRating: req.body.safetyRating,
-    }
+    },
   }).then((review) => { 
     res.json(review);
   });
