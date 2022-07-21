@@ -16,7 +16,7 @@ app.get("/locations", (req, res) => {
         category: {
           select: {
             name: true,
-          }
+          },
         },
       },
     })
@@ -55,7 +55,7 @@ app.get("/categories/", (req, res) => {
 });
 app.get("/categories/:id", (req, res) => {
   prisma.category
-    .findUnique({
+    .findMany({
       where: {
         id: Number(req.params.id),
       },
@@ -67,10 +67,20 @@ app.get("/categories/:id", (req, res) => {
       res.json(categories);
     });
 });
+app.get("/reviews/:location", (req, res) => { 
+  prisma.review
+    .findMany({
+      where: {
+        locationId: Number(req.params.location),
+      },
+    })
+    .then((reviews) => {
+      res.json(reviews);
+    });
+})
 
 //POST
 app.post("/locations", (req, res) => {
-  console.log(req.body.categoryId);
   prisma.location
     .create({
       data: {
@@ -90,12 +100,26 @@ app.post("/locations", (req, res) => {
     });
 });
 app.post("/categories", (req, res) => {
-  prisma.category.create({
+  prisma.category
+    .create({
+      data: {
+        name: req.body.name,
+      },
+    })
+    .then((category) => {
+      res.json(category);
+    });
+});
+
+app.post("/reviews", (req, res) => {
+  prisma.review.create({
     data: {
-      name: req.body.name,
+      reviewText: req.body.reviewText,
+      overallRating: req.body.overallRating,
+      safetyRating: req.body.safetyRating,
     }
-  }).then((category) => {
-    res.json(category);
+  }).then((review) => { 
+    res.json(review);
   });
 });
 
