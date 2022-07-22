@@ -1,17 +1,23 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
+const { getLocationDistance } = require("./utils/locationSort");
 const PORT = 8080;
 const app = express();
 app.use(express.json());
 //Prisma
 const prisma = new PrismaClient();
-
 //ENDPOINTS
 
 //GET
 app.get("/locations", (req, res) => {
+  const { sort, filter } = req.query;
+  console.log(filter)
+  const filterObj = filter ? { [filter]: true } : {};
+  console.log(req.query);
+
   prisma.location
     .findMany({
+      where: filterObj,
       include: {
         category: {
           select: {
@@ -21,9 +27,28 @@ app.get("/locations", (req, res) => {
       },
     })
     .then((locations) => {
-      res.json(locations);
-    });
+      Promise.all(
+        locations.map(async (location) => {
+          const aggregations = await prisma.review.aggregate({
+            _avg: {
+              overallRating: true,
+              safetyRating: true,
+            },
+            where: {
+              locationId: location.id,
+            },
+          })
+          location.avgRating = aggregations._avg.overallRating;
+          location.avgSafetyRating = aggregations._avg.safetyRating;
+          return location;
+        })
+      ).then((resolvedLocations) => {
+        res.json(getLocationDistance(resolvedLocations, req.query.lat, req.query.lng));
+      })
+    })
+      
 });
+
 app.get("/locations/:id", (req, res) => {
   prisma.location
     .findUnique({
@@ -67,7 +92,7 @@ app.get("/categories/:id", (req, res) => {
       res.json(categories);
     });
 });
-app.get("/reviews/:location", (req, res) => { 
+app.get("/reviews/:location", (req, res) => {
   prisma.review
     .findMany({
       where: {
@@ -77,7 +102,7 @@ app.get("/reviews/:location", (req, res) => {
     .then((reviews) => {
       res.json(reviews);
     });
-})
+});
 
 //POST
 app.post("/locations", (req, res) => {
@@ -112,15 +137,18 @@ app.post("/categories", (req, res) => {
 });
 
 app.post("/reviews", (req, res) => {
-  prisma.review.create({
-    data: {
-      reviewText: req.body.reviewText,
-      overallRating: req.body.overallRating,
-      safetyRating: req.body.safetyRating,
-    }
-  }).then((review) => { 
-    res.json(review);
-  });
+  prisma.review
+    .create({
+      data: {
+        locationId: req.body.locationId,
+        reviewText: req.body.reviewText,
+        overallRating: req.body.overallRating,
+        safetyRating: req.body.safetyRating,
+      },
+    })
+    .then((review) => {
+      res.json(review);
+    });
 });
 
 module.exports = app;
