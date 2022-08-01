@@ -11,9 +11,7 @@ const prisma = new PrismaClient();
 //GET
 app.get("/locations", (req, res) => {
   const { sort, filter } = req.query;
-  console.log(filter)
   const filterObj = filter ? { [filter]: true } : {};
-  console.log(req.query);
 
   prisma.location
     .findMany({
@@ -43,7 +41,7 @@ app.get("/locations", (req, res) => {
           return location;
         })
       ).then((resolvedLocations) => {
-        res.json(getLocationDistance(resolvedLocations, req.query.lat, req.query.lng));
+        res.json(getLocationDistance(resolvedLocations, req.query.lat, req.query.lng, req.query.radius));
       })
     })
       
@@ -93,6 +91,7 @@ app.get("/categories/:id", (req, res) => {
     });
 });
 app.get("/reviews/:location", (req, res) => {
+
   prisma.review
     .findMany({
       where: {
