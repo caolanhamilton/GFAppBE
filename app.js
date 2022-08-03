@@ -117,6 +117,7 @@ app.post("/locations", (req, res) => {
         phone: req.body.phone,
         dedicatedGlutenFree: req.body.dedicatedGlutenFree,
         categoryId: req.body.categoryId,
+        userId: req.body.userId,
       },
     })
     .then((location) => {
@@ -143,6 +144,7 @@ app.post("/reviews", (req, res) => {
         reviewText: req.body.reviewText,
         overallRating: req.body.overallRating,
         safetyRating: req.body.safetyRating,
+        userId: req.body.userId,
       },
     })
     .then((review) => {
