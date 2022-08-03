@@ -12,6 +12,7 @@ datasource db {
 
 model Location {
   id        Int      @id @default(autoincrement())
+  userId String 
   createdAt DateTime @default(now())
   name     String   @db.VarChar(255)
   description   String
@@ -34,6 +35,7 @@ model Category {
 
 model Review {
   id        Int      @id @default(autoincrement())
+  userId String 
   location Location @relation(fields: [locationId], references: [id])
   locationId Int
   reviewText String   @db.VarChar(255)    
