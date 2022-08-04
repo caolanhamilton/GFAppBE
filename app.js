@@ -212,7 +212,6 @@ app.post("/reviews", (req, res) => {
 //PATCH
 
 app.patch("/favourites", (req, res) => { 
-  console.log(req.body);
   prisma.location
     .update({
       where: {
