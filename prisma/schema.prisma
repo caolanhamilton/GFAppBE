@@ -11,34 +11,46 @@ datasource db {
 }
 
 model Location {
-  id        Int      @id @default(autoincrement())
-  userId String 
-  createdAt DateTime @default(now())
-  name     String   @db.VarChar(255)
-  description   String
-  lat     Float    @db.DoublePrecision
-  lng    Float    @db.DoublePrecision
-  address String   @db.VarChar(255)
-  image   String?   @db.VarChar(255)
-  phone  String?   @db.VarChar(255)
+  id                  Int                @id @default(autoincrement())
+  user                User               @relation(fields: [userId], references: [id])
+  userId              String
+  createdAt           DateTime           @default(now())
+  name                String             @db.VarChar(255)
+  description         String
+  lat                 Float              @db.DoublePrecision
+  lng                 Float              @db.DoublePrecision
+  address             String             @db.VarChar(255)
+  image               String?            @db.VarChar(255)
+  phone               String?            @db.VarChar(255)
   dedicatedGlutenFree Boolean
-  category Category @relation(fields: [categoryId], references: [id])
-  categoryId Int  
-  reviews Review[]
-} 
+  category            Category           @relation(fields: [categoryId], references: [id])
+  categoryId          Int
+  reviews             Review[]
+  favouritedBy        User[]             @relation("favRelation")
+}
+
+
+model User {
+  id                  String             @id
+  email               String             @unique
+  favouritedLocations Location[]         @relation("favRelation")
+  postedLocations     Location[]
+  postedReviews       Review[]
+}
 
 model Category {
-  id        Int      @id @default(autoincrement())
-  name     String   @db.VarChar(255)
+  id        Int        @id @default(autoincrement())
+  name      String     @db.VarChar(255)
   locations Location[]
 }
 
 model Review {
-  id        Int      @id @default(autoincrement())
-  userId String 
-  location Location @relation(fields: [locationId], references: [id])
-  locationId Int
-  reviewText String   @db.VarChar(255)    
-  overallRating Float  @db.DoublePrecision
-  safetyRating Float  @db.DoublePrecision
+  id            Int      @id @default(autoincrement())
+  user          User     @relation(fields: [userId], references: [id])
+  userId        String
+  location      Location @relation(fields: [locationId], references: [id])
+  locationId    Int
+  reviewText    String   @db.VarChar(255)
+  overallRating Float    @db.DoublePrecision
+  safetyRating  Float    @db.DoublePrecision
 }
