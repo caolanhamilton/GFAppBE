@@ -6,13 +6,30 @@ const app = express();
 app.use(express.json());
 //Prisma
 const prisma = new PrismaClient();
+
 //ENDPOINTS
 
 //GET
+app.get("/users/:id", async (req, res) => {
+  prisma.user
+    .findUnique({
+      where: {
+        id: req.params.id,
+      },
+      include: {
+        favouritedLocations: true,
+        postedLocations: true,
+        postedReviews: true,
+      },
+    })
+    .then((user) => {
+      res.json(user);
+    });
+});
+
 app.get("/locations", (req, res) => {
   const { sort, filter } = req.query;
   const filterObj = filter ? { [filter]: true } : {};
-
   prisma.location
     .findMany({
       where: filterObj,
@@ -22,6 +39,7 @@ app.get("/locations", (req, res) => {
             name: true,
           },
         },
+        favouritedBy: true,
       },
     })
     .then((locations) => {
@@ -35,16 +53,22 @@ app.get("/locations", (req, res) => {
             where: {
               locationId: location.id,
             },
-          })
+          });
           location.avgRating = aggregations._avg.overallRating;
           location.avgSafetyRating = aggregations._avg.safetyRating;
           return location;
         })
       ).then((resolvedLocations) => {
-        res.json(getLocationDistance(resolvedLocations, req.query.lat, req.query.lng, req.query.radius));
-      })
-    })
-      
+        res.json(
+          getLocationDistance(
+            resolvedLocations,
+            req.query.lat,
+            req.query.lng,
+            req.query.radius
+          )
+        );
+      });
+    });
 });
 
 app.get("/locations/:id", (req, res) => {
@@ -59,6 +83,7 @@ app.get("/locations/:id", (req, res) => {
             name: true,
           },
         },
+        favouritedBy: true,
       },
     })
     .then((location) => {
@@ -91,7 +116,6 @@ app.get("/categories/:id", (req, res) => {
     });
 });
 app.get("/reviews/:location", (req, res) => {
-
   prisma.review
     .findMany({
       where: {
@@ -104,6 +128,39 @@ app.get("/reviews/:location", (req, res) => {
 });
 
 //POST
+
+app.post("/favourites", (req, res) => {
+  prisma.location
+    .update({
+      where: {
+        id: Number(req.body.locationId),
+      },
+      data: {
+        favouritedBy: {
+          connect: {
+            id: req.body.userId,
+          },
+        },
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
+});
+
+app.post("/users", (req, res) => {
+  prisma.user
+    .create({
+      data: {
+        id: req.body.id,
+        email: req.body.email,
+      },
+    })
+    .then((user) => {
+      res.json(user);
+    });
+});
+
 app.post("/locations", (req, res) => {
   prisma.location
     .create({
@@ -151,5 +208,28 @@ app.post("/reviews", (req, res) => {
       res.json(review);
     });
 });
+
+//PATCH
+
+app.patch("/favourites", (req, res) => { 
+  console.log(req.body);
+  prisma.location
+    .update({
+      where: {
+        id: Number(req.body.locationId),
+      },
+      data: {
+        favouritedBy: {
+          disconnect: {
+            id: req.body.userId,
+          }
+        }
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
+})
+
 
 module.exports = app;
