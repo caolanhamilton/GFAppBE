@@ -10,7 +10,7 @@ const prisma = new PrismaClient();
 //ENDPOINTS
 
 //GET
-app.get("/users/:id", async (req, res) => {
+app.get("/users/:id", (req, res) => {
   prisma.user
     .findUnique({
       where: {
@@ -26,6 +26,52 @@ app.get("/users/:id", async (req, res) => {
       res.json(user);
     });
 });
+
+app.get("/favourites/:id", (req, res) => { 
+  console.log(req.query);
+  prisma.location
+    .findMany({
+      where: {
+        favouritedBy: {
+          some: {
+            id: {
+              equals: "3QUmJmKOdoaAchB2R0lfogEgHxY2",
+            },
+          },
+        },
+      },
+      include: {
+        favouritedBy: true,
+      },
+    })
+    .then((locations) => {
+      Promise.all(
+        locations.map(async (location) => {
+          const aggregations = await prisma.review.aggregate({
+            _avg: {
+              overallRating: true,
+              safetyRating: true,
+            },
+            where: {
+              locationId: location.id,
+            },
+          });
+          location.avgRating = aggregations._avg.overallRating;
+          location.avgSafetyRating = aggregations._avg.safetyRating;
+          return location;
+        })
+      ).then((resolvedLocations) => {
+        res.json(
+          getLocationDistance(
+            resolvedLocations,
+            req.query.lat,
+            req.query.long,
+            req.query.radius
+          )
+        );
+      });
+    });
+}); 
 
 app.get("/locations", (req, res) => {
   const { sort, filter } = req.query;
