@@ -1,20 +1,52 @@
 const express = require("express");
 const { PrismaClient } = require("@prisma/client");
 const { getLocationDistance } = require("./utils/locationSort");
+const { initializeApp } = require("firebase-admin/app");
 const PORT = 8080;
 const app = express();
 app.use(express.json());
 //Prisma
 const prisma = new PrismaClient();
+let firebaseapp = null;
+
+const firebaseAuthMiddleware = (req, res, next) => {
+  var admin = require("firebase-admin");
+  var serviceAccount = require("./gfapp-356213-firebase-adminsdk-irn59-14d2615798.json");
+  if (!firebaseapp) {
+    firebaseapp = admin.initializeApp({
+      credential: admin.credential.cert(serviceAccount),
+    });
+  }
+
+  const tokenString = req.headers.authorization?.split(" ");
+  if (!tokenString) {
+    return res.status(401).send("Unauthorized, no header provided");
+  } else if (!tokenString[1]) {
+    return res.status(401).send("Unauthorized, no token provided");
+  } else {
+    const token = tokenString[1];
+    admin
+      .auth()
+      .verifyIdToken(token)
+      .then((decodedToken) => {
+        res.locals.decodedUserToken = decodedToken;
+        next();
+      })
+      .catch((error) => {
+        return res.status(401).send("Unauthorized, invalid token");
+      });
+  }
+};
 
 //ENDPOINTS
 
 //GET
-app.get("/users/:id", (req, res) => {
+
+app.get("/users/getByUserId", firebaseAuthMiddleware, (req, res) => {
   prisma.user
     .findUnique({
       where: {
-        id: req.params.id,
+        id: res.locals.decodedUserToken.uid,
       },
       include: {
         favouritedLocations: true,
@@ -27,15 +59,14 @@ app.get("/users/:id", (req, res) => {
     });
 });
 
-app.get("/favourites/:id", (req, res) => { 
-  console.log(req.query);
+app.get("/favourites", firebaseAuthMiddleware, (req, res) => {
   prisma.location
     .findMany({
       where: {
         favouritedBy: {
           some: {
             id: {
-              equals: "3QUmJmKOdoaAchB2R0lfogEgHxY2",
+              equals: res.locals.decodedUserToken.uid,
             },
           },
         },
@@ -61,6 +92,7 @@ app.get("/favourites/:id", (req, res) => {
           return location;
         })
       ).then((resolvedLocations) => {
+
         res.json(
           getLocationDistance(
             resolvedLocations,
@@ -71,7 +103,7 @@ app.get("/favourites/:id", (req, res) => {
         );
       });
     });
-}); 
+});
 
 app.get("/locations", (req, res) => {
   const { sort, filter } = req.query;
@@ -184,7 +216,7 @@ app.post("/favourites", (req, res) => {
       data: {
         favouritedBy: {
           connect: {
-            id: req.body.userId,
+            id: "b3AGTYLi5wXsIKVXRnzuMkAS9oZ2",
           },
         },
       },
@@ -257,7 +289,8 @@ app.post("/reviews", (req, res) => {
 
 //PATCH
 
-app.patch("/favourites", (req, res) => { 
+app.patch("/favourites", firebaseAuthMiddleware, (req, res) => {
+    console.log(res.locals.decodedUserToken.uid);
   prisma.location
     .update({
       where: {
@@ -266,15 +299,14 @@ app.patch("/favourites", (req, res) => {
       data: {
         favouritedBy: {
           disconnect: {
-            id: req.body.userId,
-          }
-        }
+            id: res.locals.decodedUserToken.uid,
+          },
+        },
       },
     })
     .then((location) => {
       res.json(location);
     });
-})
-
+});
 
 module.exports = app;
