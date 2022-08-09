@@ -1,3 +1,4 @@
 node_modules
 # Keep environment variables out of version control
 .env
+gfapp-356213-firebase-adminsdk-irn59-14d2615798.json
