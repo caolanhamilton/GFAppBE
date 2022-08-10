@@ -40,7 +40,20 @@ const firebaseAuthMiddleware = (req, res, next) => {
 
 //ENDPOINTS
 
-//GET
+//User endpoints
+
+app.post("/users", (req, res) => {
+  prisma.user
+    .create({
+      data: {
+        id: req.body.id,
+        email: req.body.email,
+      },
+    })
+    .then((user) => {
+      res.json(user);
+    });
+});
 
 app.get("/users/getByUserId", firebaseAuthMiddleware, (req, res) => {
   prisma.user
@@ -59,7 +72,27 @@ app.get("/users/getByUserId", firebaseAuthMiddleware, (req, res) => {
     });
 });
 
-app.get("/favourites", firebaseAuthMiddleware, (req, res) => {
+app.patch("/users/favourites", firebaseAuthMiddleware, (req, res) => {
+  console.log(res.locals.decodedUserToken.uid);
+  prisma.location
+    .update({
+      where: {
+        id: Number(req.body.locationId),
+      },
+      data: {
+        favouritedBy: {
+          disconnect: {
+            id: res.locals.decodedUserToken.uid,
+          },
+        },
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
+});
+
+app.get("/users/favourites", firebaseAuthMiddleware, (req, res) => {
   prisma.location
     .findMany({
       where: {
@@ -92,7 +125,6 @@ app.get("/favourites", firebaseAuthMiddleware, (req, res) => {
           return location;
         })
       ).then((resolvedLocations) => {
-
         res.json(
           getLocationDistance(
             resolvedLocations,
@@ -104,6 +136,27 @@ app.get("/favourites", firebaseAuthMiddleware, (req, res) => {
       });
     });
 });
+
+app.post("/users/favourites", (req, res) => {
+  prisma.location
+    .update({
+      where: {
+        id: Number(req.body.locationId),
+      },
+      data: {
+        favouritedBy: {
+          connect: {
+            id: "b3AGTYLi5wXsIKVXRnzuMkAS9oZ2",
+          },
+        },
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
+});
+
+//Location endpoints
 
 app.get("/locations", (req, res) => {
   const { sort, filter } = req.query;
@@ -168,6 +221,58 @@ app.get("/locations/:id", (req, res) => {
       res.json(location);
     });
 });
+
+app.post("/locations", firebaseAuthMiddleware, (req, res) => {
+  prisma.location
+    .create({
+      data: {
+        name: req.body.name,
+        description: req.body.description,
+        lat: req.body.lat,
+        lng: req.body.lng,
+        address: req.body.address,
+        image: req.body.image,
+        phone: req.body.phone,
+        dedicatedGlutenFree: req.body.dedicatedGlutenFree,
+        categoryId: req.body.categoryId,
+        userId: res.locals.decodedUserToken.uid,
+      },
+    })
+    .then((location) => {
+      res.json(location);
+    });
+});
+
+app.get("/locations/reviews/:location", (req, res) => {
+  prisma.review
+    .findMany({
+      where: {
+        locationId: Number(req.params.location),
+      },
+    })
+    .then((reviews) => {
+      res.json(reviews);
+    });
+});
+
+app.post("/locations/reviews", firebaseAuthMiddleware, (req, res) => {
+  prisma.review
+    .create({
+      data: {
+        locationId: req.body.locationId,
+        reviewText: req.body.reviewText,
+        overallRating: req.body.overallRating,
+        safetyRating: req.body.safetyRating,
+        userId: res.locals.decodedUserToken.uid,
+      },
+    })
+    .then((review) => {
+      res.json(review);
+    });
+});
+
+//Category endpoints
+
 app.get("/categories/", (req, res) => {
   prisma.category
     .findMany({
@@ -179,6 +284,7 @@ app.get("/categories/", (req, res) => {
       res.json(categories);
     });
 });
+
 app.get("/categories/:id", (req, res) => {
   prisma.category
     .findMany({
@@ -193,72 +299,7 @@ app.get("/categories/:id", (req, res) => {
       res.json(categories);
     });
 });
-app.get("/reviews/:location", (req, res) => {
-  prisma.review
-    .findMany({
-      where: {
-        locationId: Number(req.params.location),
-      },
-    })
-    .then((reviews) => {
-      res.json(reviews);
-    });
-});
 
-//POST
-
-app.post("/favourites", (req, res) => {
-  prisma.location
-    .update({
-      where: {
-        id: Number(req.body.locationId),
-      },
-      data: {
-        favouritedBy: {
-          connect: {
-            id: "b3AGTYLi5wXsIKVXRnzuMkAS9oZ2",
-          },
-        },
-      },
-    })
-    .then((location) => {
-      res.json(location);
-    });
-});
-
-app.post("/users", (req, res) => {
-  prisma.user
-    .create({
-      data: {
-        id: req.body.id,
-        email: req.body.email,
-      },
-    })
-    .then((user) => {
-      res.json(user);
-    });
-});
-
-app.post("/locations", (req, res) => {
-  prisma.location
-    .create({
-      data: {
-        name: req.body.name,
-        description: req.body.description,
-        lat: req.body.lat,
-        lng: req.body.lng,
-        address: req.body.address,
-        image: req.body.image,
-        phone: req.body.phone,
-        dedicatedGlutenFree: req.body.dedicatedGlutenFree,
-        categoryId: req.body.categoryId,
-        userId: req.body.userId,
-      },
-    })
-    .then((location) => {
-      res.json(location);
-    });
-});
 app.post("/categories", (req, res) => {
   prisma.category
     .create({
@@ -271,42 +312,6 @@ app.post("/categories", (req, res) => {
     });
 });
 
-app.post("/reviews", (req, res) => {
-  prisma.review
-    .create({
-      data: {
-        locationId: req.body.locationId,
-        reviewText: req.body.reviewText,
-        overallRating: req.body.overallRating,
-        safetyRating: req.body.safetyRating,
-        userId: req.body.userId,
-      },
-    })
-    .then((review) => {
-      res.json(review);
-    });
-});
 
-//PATCH
-
-app.patch("/favourites", firebaseAuthMiddleware, (req, res) => {
-    console.log(res.locals.decodedUserToken.uid);
-  prisma.location
-    .update({
-      where: {
-        id: Number(req.body.locationId),
-      },
-      data: {
-        favouritedBy: {
-          disconnect: {
-            id: res.locals.decodedUserToken.uid,
-          },
-        },
-      },
-    })
-    .then((location) => {
-      res.json(location);
-    });
-});
 
 module.exports = app;
