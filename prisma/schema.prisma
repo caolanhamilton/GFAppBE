@@ -36,6 +36,8 @@ model User {
   favouritedLocations Location[]         @relation("favRelation")
   postedLocations     Location[]
   postedReviews       Review[]
+  firstName           String             @db.VarChar(255)
+  lastName            String             @db.VarChar(255) 
 }
 
 model Category {

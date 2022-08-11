@@ -42,12 +42,14 @@ const firebaseAuthMiddleware = (req, res, next) => {
 
 //User endpoints
 
-app.post("/users", (req, res) => {
+app.post("/users", firebaseAuthMiddleware, (req, res) => {
   prisma.user
     .create({
       data: {
-        id: req.body.id,
+        id: res.locals.decodedUserToken.uid,
         email: req.body.email,
+        firstName: req.body.name,
+        lastName: req.body.lastname,
       },
     })
     .then((user) => {
@@ -73,7 +75,6 @@ app.get("/users/getByUserId", firebaseAuthMiddleware, (req, res) => {
 });
 
 app.patch("/users/favourites", firebaseAuthMiddleware, (req, res) => {
-  console.log(res.locals.decodedUserToken.uid);
   prisma.location
     .update({
       where: {
@@ -137,7 +138,8 @@ app.get("/users/favourites", firebaseAuthMiddleware, (req, res) => {
     });
 });
 
-app.post("/users/favourites", (req, res) => {
+app.post("/users/favourites", firebaseAuthMiddleware, (req, res) => {
+  console.log(res.locals.decodedUserToken.uid);
   prisma.location
     .update({
       where: {
@@ -146,12 +148,13 @@ app.post("/users/favourites", (req, res) => {
       data: {
         favouritedBy: {
           connect: {
-            id: "b3AGTYLi5wXsIKVXRnzuMkAS9oZ2",
+            id: res.locals.decodedUserToken.uid,
           },
         },
       },
     })
     .then((location) => {
+      console.log(location);
       res.json(location);
     });
 });
@@ -311,7 +314,5 @@ app.post("/categories", (req, res) => {
       res.json(category);
     });
 });
-
-
 
 module.exports = app;
