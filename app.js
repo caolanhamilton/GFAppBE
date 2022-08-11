@@ -43,13 +43,14 @@ const firebaseAuthMiddleware = (req, res, next) => {
 //User endpoints
 
 app.post("/users", firebaseAuthMiddleware, (req, res) => {
+  console.log(req.body)
   prisma.user
     .create({
       data: {
         id: res.locals.decodedUserToken.uid,
         email: req.body.email,
-        firstName: req.body.name,
-        lastName: req.body.lastname,
+        firstName: req.body.firstName,
+        lastName: req.body.lastName,
       },
     })
     .then((user) => {
