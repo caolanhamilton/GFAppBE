@@ -19,6 +19,8 @@ const firebaseAuthMiddleware = (req, res, next) => {
   }
 
   const tokenString = req.headers.authorization?.split(" ");
+  console.log(tokenString, "in middleware");
+
   if (!tokenString) {
     return res.status(401).send("Unauthorized, no header provided");
   } else if (!tokenString[1]) {
@@ -43,7 +45,6 @@ const firebaseAuthMiddleware = (req, res, next) => {
 //User endpoints
 
 app.post("/users", firebaseAuthMiddleware, (req, res) => {
-  console.log(req.body)
   prisma.user
     .create({
       data: {
@@ -55,6 +56,22 @@ app.post("/users", firebaseAuthMiddleware, (req, res) => {
     })
     .then((user) => {
       res.json(user);
+    });
+});
+
+app.delete("/users", firebaseAuthMiddleware, (req, res) => {
+  console.log("deleteBe");
+  prisma.user
+    .delete({
+      where: {
+        id: res.locals.decodedUserToken.uid,
+      },
+    })
+    .then(() => {
+      res.json("user deleted");
+    })
+    .catch((error) => {
+      console.log(error);
     });
 });
 
@@ -140,7 +157,6 @@ app.get("/users/favourites", firebaseAuthMiddleware, (req, res) => {
 });
 
 app.post("/users/favourites", firebaseAuthMiddleware, (req, res) => {
-  console.log(res.locals.decodedUserToken.uid);
   prisma.location
     .update({
       where: {
@@ -155,7 +171,6 @@ app.post("/users/favourites", firebaseAuthMiddleware, (req, res) => {
       },
     })
     .then((location) => {
-      console.log(location);
       res.json(location);
     });
 });
