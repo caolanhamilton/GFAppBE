@@ -50,7 +50,7 @@ model Review {
   id            Int      @id @default(autoincrement())
   user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
   userId        String
-  location      Location @relation(fields: [locationId], references: [id])
+  location      Location @relation(fields: [locationId], references: [id], onDelete: Cascade)
   locationId    Int
   reviewText    String   @db.VarChar(255)
   overallRating Float    @db.DoublePrecision
