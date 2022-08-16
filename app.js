@@ -301,6 +301,18 @@ app.delete("/locations/:id", (req, res) => {
     });
 });
 
+app.delete("/locations/reviews/:id", (req, res) => { 
+  prisma.review
+    .delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    })
+    .then((review) => {
+      res.json(review);
+    });
+})
+
 //Category endpoints
 
 app.get("/categories/", (req, res) => {
