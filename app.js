@@ -19,7 +19,6 @@ const firebaseAuthMiddleware = (req, res, next) => {
   }
 
   const tokenString = req.headers.authorization?.split(" ");
-  console.log(tokenString, "in middleware");
 
   if (!tokenString) {
     return res.status(401).send("Unauthorized, no header provided");
@@ -60,7 +59,6 @@ app.post("/users", firebaseAuthMiddleware, (req, res) => {
 });
 
 app.delete("/users", firebaseAuthMiddleware, (req, res) => {
-  console.log("deleteBe");
   prisma.user
     .delete({
       where: {
@@ -287,6 +285,19 @@ app.post("/locations/reviews", firebaseAuthMiddleware, (req, res) => {
     })
     .then((review) => {
       res.json(review);
+    });
+});
+
+app.delete("/locations/:id", (req, res) => { 
+  console.log(req.params.id);
+  prisma.location
+    .delete({
+      where: {
+        id: Number(req.params.id),
+      },
+    })
+    .then((location) => {
+      res.json(location);
     });
 });
 
