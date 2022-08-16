@@ -173,6 +173,25 @@ app.post("/users/favourites", firebaseAuthMiddleware, (req, res) => {
     });
 });
 
+app.patch("/users/email", firebaseAuthMiddleware, (req, res) => { 
+  console.log(req.body.email);
+  prisma.user
+    .update({
+      where: {
+        id: res.locals.decodedUserToken.uid,
+      },
+      data: {
+        email: req.body.email,
+      },
+    })
+    .then((user) => {
+      res.json(user);
+    }).catch((error) => {
+      console.log(error);
+    }
+  );
+})
+
 //Location endpoints
 
 app.get("/locations", (req, res) => {
