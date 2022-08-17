@@ -41,6 +41,10 @@ const firebaseAuthMiddleware = (req, res, next) => {
 
 //ENDPOINTS
 
+app.get("/", (req, res) => { 
+  res.send("Welcome to GF Eats API");
+})
+
 //User endpoints
 
 app.post("/users", firebaseAuthMiddleware, (req, res) => {
