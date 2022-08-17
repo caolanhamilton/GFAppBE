@@ -23,8 +23,6 @@ model Location {
   image               String?            @db.VarChar(255)
   phone               String?            @db.VarChar(255)
   dedicatedGlutenFree Boolean
-  category            Category           @relation(fields: [categoryId], references: [id])
-  categoryId          Int
   reviews             Review[]
   favouritedBy        User[]             @relation("favRelation")
 }
@@ -40,11 +38,6 @@ model User {
   lastName            String             @db.VarChar(255) 
 }
 
-model Category {
-  id        Int        @id @default(autoincrement())
-  name      String     @db.VarChar(255)
-  locations Location[]
-}
 
 model Review {
   id            Int      @id @default(autoincrement())

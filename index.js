@@ -204,11 +204,6 @@ app.get("/locations", (req, res) => {
     .findMany({
       where: filterObj,
       include: {
-        category: {
-          select: {
-            name: true,
-          },
-        },
         favouritedBy: true,
       },
     })
@@ -248,11 +243,6 @@ app.get("/locations/:id", (req, res) => {
         id: Number(req.params.id),
       },
       include: {
-        category: {
-          select: {
-            name: true,
-          },
-        },
         favouritedBy: true,
       },
     })
@@ -273,7 +263,6 @@ app.post("/locations", firebaseAuthMiddleware, (req, res) => {
         image: req.body.image,
         phone: req.body.phone,
         dedicatedGlutenFree: req.body.dedicatedGlutenFree,
-        categoryId: req.body.categoryId,
         userId: res.locals.decodedUserToken.uid,
       },
     })
@@ -335,46 +324,6 @@ app.delete("/locations/reviews/:id", (req, res) => {
     });
 })
 
-//Category endpoints
-
-app.get("/categories/", (req, res) => {
-  prisma.category
-    .findMany({
-      include: {
-        locations: true,
-      },
-    })
-    .then((categories) => {
-      res.json(categories);
-    });
-});
-
-app.get("/categories/:id", (req, res) => {
-  prisma.category
-    .findMany({
-      where: {
-        id: Number(req.params.id),
-      },
-      include: {
-        locations: true,
-      },
-    })
-    .then((categories) => {
-      res.json(categories);
-    });
-});
-
-app.post("/categories", (req, res) => {
-  prisma.category
-    .create({
-      data: {
-        name: req.body.name,
-      },
-    })
-    .then((category) => {
-      res.json(category);
-    });
-});
 
 const PORT = process.env.PORT || 3000;
 const server = app.listen(PORT, () => {
