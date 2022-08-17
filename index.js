@@ -10,7 +10,7 @@ let firebaseapp = null;
 
 const firebaseAuthMiddleware = (req, res, next) => {
   var admin = require("firebase-admin");
-  var serviceAccount = require("./gfapp-356213-firebase-adminsdk-irn59-14d2615798.json");
+  var serviceAccount = process.env.SERVICE_ACCOUNT_FILE;
   if (!firebaseapp) {
     firebaseapp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
