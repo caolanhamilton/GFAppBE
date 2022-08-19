@@ -277,6 +277,9 @@ app.get("/locations/reviews/:location", (req, res) => {
       where: {
         locationId: Number(req.params.location),
       },
+      include: {
+        user: true,
+      }
     })
     .then((reviews) => {
       res.json(reviews);
