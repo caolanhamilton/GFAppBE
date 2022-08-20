@@ -1,4 +1,4 @@
--- DropForeignKey
+git add .-- DropForeignKey
 ALTER TABLE "Review" DROP CONSTRAINT "Review_locationId_fkey";
 
 -- AddForeignKey
