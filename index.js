@@ -10,7 +10,7 @@ let firebaseapp = null;
 
 const firebaseAuthMiddleware = (req, res, next) => {
   var admin = require("firebase-admin");
-  var serviceAccount = process.env.GOOGLE_CREDENTIALS;
+  var serviceAccount = process.env.GOOGLE_APPLICATION_CREDENTIALS;
   if (!firebaseapp) {
     firebaseapp = admin.initializeApp({
       credential: admin.credential.cert(serviceAccount),
