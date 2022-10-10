@@ -2,6 +2,7 @@
 
 Gluten Free Eats API provides a REST API for consumption by an [iOS and Android app](https://github.com/caolanhamilton/GlutenFreeEatsApp.git) that allows sufferers of celiac disease and gluten intolerance to crowdsource safe places to dine out.
 
+
 ## Features
 
 Allows GET, POST, PATCH and DELETE requests to:
