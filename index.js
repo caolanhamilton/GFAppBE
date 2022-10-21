@@ -15,9 +15,9 @@ const firebaseAuthMiddleware = (req, res, next) => {
   if (!firebaseapp) {
     firebaseapp = admin.initializeApp({
       credential: admin.credential.cert({
-        projectId: env.project_id,
-        clientEmail: env.client_email,
-        privateKey: env.private_key,
+        projectId: ENV.project_id,
+        clientEmail: ENV.client_email,
+        privateKey: ENV.private_key,
       }),
     });
   }
